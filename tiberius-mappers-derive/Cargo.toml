@@ -1,0 +1,16 @@
+[package]
+name = "tiberius-mappers-derive"
+version = "0.1.0"
+edition = "2021"
+description = "Derive macros for tiberius-mappers"
+
+
+
+[dependencies]
+quote = "1.0.33"
+syn = "2.0.37"
+proc-macro2 = "1"
+
+[lib]
+proc-macro = true
+
