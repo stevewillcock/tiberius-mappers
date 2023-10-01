@@ -49,4 +49,6 @@ pub async fn print_customers(pool: &Pool<ConnectionManager>) -> Result<(), Box<d
 - Add tests (proc macros are not as straightforward to test!)
 - Support mapping by index
 - Improve error messages
+- Support an owned version of the trait (e.g. FromRowOwned or via derive attribute parameters) - this would allow us to
+  support mapping to structs without a lifetime parameter. Would need to map &str to String, etc.
 - Support renaming fields (maybe, not sure if this is a good idea!)
