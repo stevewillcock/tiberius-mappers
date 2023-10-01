@@ -2,8 +2,11 @@
 name = "tiberius-mappers"
 version = "0.1.0"
 edition = "2021"
+description = "Row mappers for Tiberius"
+license = "MIT"
+repository = "https://github.com/stevewillcock/tiberius-mappers"
 
 
 [dependencies]
 tiberius = { version = "0.12.2", default-features = false }
-tiberius-mappers-derive = { path = "tiberius-mappers-derive" }
+tiberius-mappers-derive = { version = "0.1.0", path = "tiberius-mappers-derive" }
