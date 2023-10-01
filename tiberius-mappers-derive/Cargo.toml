@@ -3,7 +3,8 @@ name = "tiberius-mappers-derive"
 version = "0.1.0"
 edition = "2021"
 description = "Derive macros for tiberius-mappers"
-
+license = "MIT"
+repository = "https://github.com/stevewillcock/tiberius-mappers"
 
 
 [dependencies]
