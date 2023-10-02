@@ -1,17 +1,8 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{DeriveInput, Field, Ident, Path};
+use syn::{DeriveInput, Field, Ident};
 
-fn type_is_option(typ: &syn::Type) -> bool {
-    let option = syn::parse_str::<Path>("Option").unwrap();
-
-    match typ {
-        syn::Type::Path(typepath) if typepath.qself.is_none() => typepath.path.segments.iter().any(|s| s.ident == option.segments[0].ident),
-        _ => false,
-    }
-}
-
-fn impl_from_row_trait(ast: DeriveInput) -> proc_macro2::TokenStream {
+fn impl_from_trait_for_row(ast: DeriveInput) -> proc_macro2::TokenStream {
     let ident: Ident = ast.ident;
 
     let mut field_metadatas: Vec<Field> = vec![];
@@ -19,7 +10,7 @@ fn impl_from_row_trait(ast: DeriveInput) -> proc_macro2::TokenStream {
     match ast.data {
         syn::Data::Struct(data) => {
             for field in data.fields {
-                if (&field.ident).is_some() {
+                if (field.ident).is_some() {
                     field_metadatas.push(field)
                 }
             }
@@ -28,63 +19,16 @@ fn impl_from_row_trait(ast: DeriveInput) -> proc_macro2::TokenStream {
     };
 
     let field_mappers: Vec<proc_macro2::TokenStream> = field_metadatas
-        .iter()
-        .map(|f| {
-            let f_ident = f.ident.as_ref().unwrap();
-            let f_ident_str = f_ident.to_string();
-
-            if type_is_option(&f.ty) {
-                quote! {
-                    #f_ident: tiberius_mappers::map_optional_field(row, #f_ident_str)?
-                }
-            } else {
-                quote! {
-                    #f_ident: tiberius_mappers::map_field(row, #f_ident_str)?
-                }
-            }
-        })
-        .collect();
-
-    (quote! {
-        impl<'a> FromRowBorrowed<'a> for #ident<'a> {
-            fn from_row_borrowed(row: &'a tiberius::Row) -> Result<Self, tiberius::error::Error> where Self: Sized {
-                Ok(Self {
-                    #(#field_mappers,)*
-                })
-            }
-        }
-    })
-    .into()
-}
-
-fn impl_from_row_trait_owned(ast: DeriveInput) -> proc_macro2::TokenStream {
-    let ident: Ident = ast.ident;
-
-    let mut field_metadatas: Vec<Field> = vec![];
-
-    match ast.data {
-        syn::Data::Struct(data) => {
-            for field in data.fields {
-                if (&field.ident).is_some() {
-                    field_metadatas.push(field)
-                }
-            }
-        }
-        _ => panic!("Only structs are supported by tiberius mappers derive"),
-    };
-
-    let owned_field_mappers: Vec<proc_macro2::TokenStream> = field_metadatas
         .into_iter()
         .enumerate()
         .map(|(idx, field)| {
             let f_ident = field.ident.unwrap();
             let f_type = field.ty;
-            // println!("*** f_ident: {:?}", f_ident);
+            // This is very closed based on code from tiberius_derive
             quote! {
                     #f_ident: {
-                        macro_rules! read_owned_data {
+                        macro_rules! read_data {
                             (Option<$f_type: ty>) => { {
-                                    // println!("*** Option1 {}", stringify!(#f_ident));
                                     <$f_type as tiberius::FromSqlOwned>::from_sql_owned(row_iter.next().ok_or_else(
                                         || tiberius::error::Error::Conversion(
                                             format!("Could not find field {} from column with index {}", stringify!(#f_ident), #idx).into()
@@ -92,7 +36,6 @@ fn impl_from_row_trait_owned(ast: DeriveInput) -> proc_macro2::TokenStream {
                                     )?)?
                                } };
                             ($f_type: ty) => { {
-                                // println!("*** Option2 {}", stringify!(#f_ident));
                                 (<$f_type as tiberius::FromSqlOwned>::from_sql_owned(row_iter.next().ok_or_else(
                                     || tiberius::error::Error::Conversion(
                                         format!("Could not find field {} from column with index {}", stringify!(#f_ident), #idx).into()
@@ -105,33 +48,27 @@ fn impl_from_row_trait_owned(ast: DeriveInput) -> proc_macro2::TokenStream {
                             }};
                         };
 
-                        read_owned_data!(#f_type)
+                        read_data!(#f_type)
                 }
             }
         })
         .collect::<Vec<_>>();
 
-    (quote! {
-        impl FromRowOwned for #ident {
-            fn from_row_owned(row: tiberius::Row) -> Result<Self, tiberius::error::Error> where Self: Sized {
+    quote! {
+        impl TryFromRow for #ident {
+
+            fn try_from_row(row: tiberius::Row) -> Result<Self, tiberius::error::Error> where Self: Sized {
                 let mut row_iter = row.into_iter();
                 Ok(Self {
-                    #(#owned_field_mappers,)*
+                    #(#field_mappers,)*
                 })
             }
         }
-    })
-    .into()
+    }
 }
 
-#[proc_macro_derive(FromRowBorrowed)]
-pub fn from_row_derive_macro(input: TokenStream) -> TokenStream {
-    let ast: DeriveInput = syn::parse(input).unwrap();
-    impl_from_row_trait(ast).into()
-}
-
-#[proc_macro_derive(FromRowOwned)]
+#[proc_macro_derive(TryFromRow)]
 pub fn from_row_derive_macro_owned(input: TokenStream) -> TokenStream {
     let ast: DeriveInput = syn::parse(input).unwrap();
-    impl_from_row_trait_owned(ast).into()
+    impl_from_trait_for_row(ast).into()
 }

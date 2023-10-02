@@ -2,57 +2,17 @@
 mod test {
     use tiberius::error::Error;
     use tiberius::{FromSqlOwned, Row};
-    use tiberius_mappers::{FromRowBorrowed, FromRowOwned};
+    use tiberius_mappers::TryFromRow;
 
     #[test]
-    fn can_compile_manual_borrowed_trait() {
-        #[allow(dead_code)]
-        struct Test<'a> {
-            id: i32,
-            name: &'a str,
-        }
-
-        impl<'a> FromRowBorrowed<'a> for Test<'a> {
-            fn from_row_borrowed(row: &'a Row) -> Result<Self, Error>
-            where
-                Self: Sized,
-            {
-                Ok(Self {
-                    id: row.try_get::<i32, &str>("id")?.ok_or_else(|| {
-                        Error::Conversion(
-                            format!("None value for non optional field {}", "id").into(),
-                        )
-                    })?,
-                    name: row.try_get::<&str, &str>("name")?.ok_or_else(|| {
-                        Error::Conversion(
-                            format!("None value for non optional field {}", "name").into(),
-                        )
-                    })?,
-                })
-            }
-        }
-    }
-
-    #[test]
-    fn can_compile_derived_borrowed_trait() {
-        #[derive(FromRowBorrowed)]
-        #[allow(dead_code)]
-        struct Test<'a> {
-            id: i32,
-            name: &'a str,
-        }
-    }
-
-    #[test]
-    fn can_compile_manual_owned_trait() {
+    fn can_compile_manual_trait_impl() {
         #[allow(dead_code)]
         struct Test {
             id: i32,
             z_location: i32,
         }
-
-        impl FromRowOwned for Test {
-            fn from_row_owned(row: Row) -> Result<Self, Error>
+        impl TryFromRow for Test {
+            fn try_from_row(row: Row) -> Result<Test, Error>
             where
                 Self: Sized,
             {
@@ -91,7 +51,7 @@ mod test {
 
     #[test]
     fn can_compile_derived_owned_trait() {
-        #[derive(FromRowOwned)]
+        #[derive(TryFromRow)]
         #[allow(dead_code)]
         struct Test {
             id: i32,
