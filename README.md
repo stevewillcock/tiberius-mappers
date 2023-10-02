@@ -6,8 +6,9 @@ See the [published crate](https://crates.io/crates/tiberius-mappers) and
 the [documentation](https://docs.rs/crate/tiberius-mappers/latest) for more information.
 
 - Allows you to map tiberius rows to structs
-- Defines `FromRow` trait for `tiberius::Row`
-- Supports deriving the `FromRowOwned` traits for structs via the tiberius-mappers-derive crate
+- Defines a `TryFromRow` trait for `tiberius::Row`
+- Supports deriving the `TryFromRow` traits for structs via the tiberius-mappers-derive crate
+- Requires the columns in the SQL query to be in the same order as the struct fields
 - Handles null values where these map to Option<T> fields in the struct
 - Currently maps by name in FromRowBorrowed and by index in FromRowOwned
 
@@ -34,7 +35,11 @@ pub struct Customer {
 }
 
 pub async fn print_customers(rows: Vec<tiberius::Row>) -> Result<(), Box<dyn std::error::Error>> {
-    let customers: Vec<Customer> = rows.into_iter().map(Customer::try_from_row).collect::<Result<Vec<Customer>, _>>()?;
+    
+    // Now we can call the try_from_row method on each row to get a Customer struct
+    let customers: Vec<Customer> = rows
+            .into_iter()
+            .map(Customer::try_from_row).collect::<Result<Vec<Customer>, _>>()?;
 
     for customer in customers {
         println!("Customer: {} - {:?} - {:?}", customer.id, customer.first_name, customer.last_name);
