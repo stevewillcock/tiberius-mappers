@@ -1,8 +1,9 @@
 use tiberius::FromSql;
-pub use tiberius_mappers_derive::FromRowZeroCopy;
+pub use tiberius_mappers_derive::FromRowBorrowed;
+pub use tiberius_mappers_derive::FromRowOwned;
 
-pub trait FromRowZeroCopy<'a> {
-    fn from_row_zero_copy(row: &'a tiberius::Row) -> Result<Self, tiberius::error::Error>
+pub trait FromRowBorrowed<'a> {
+    fn from_row_borrowed(row: &'a tiberius::Row) -> Result<Self, tiberius::error::Error>
     where
         Self: Sized;
 }
@@ -20,4 +21,10 @@ where
     T: FromSql<'a>,
 {
     row.try_get::<T, &str>(field_name)
+}
+
+pub trait FromRowOwned {
+    fn from_row_owned(row: tiberius::Row) -> Result<Self, tiberius::error::Error>
+    where
+        Self: Sized;
 }

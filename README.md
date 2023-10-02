@@ -3,10 +3,10 @@
 Row mappers for the [Tiberius SQL Server driver](https://github.com/prisma/tiberius).
 
 - Allows you to map tiberius rows to structs
-- Defines a FromRowZeroCopy trait that allows you to map rows to structs without copying the data
-- Supports deriving the FromRowZeroCopy trait for structs via the tiberius-mappers-derive crate
+- Defines `FromRowBorrowed` and `FromRowOwned` traits
+- Supports deriving the `FromRowBorrowed` and `FromRowOwned` traits for structs via the tiberius-mappers-derive crate
 - Handles null values where these map to Option<T> fields in the struct
-- Currently maps by name, not by index
+- Currently maps by name in FromRowBorrowed and by index in FromRowOwned
 
 The existing [tiberius-derive](https://crates.io/crates/tiberius-derive) crate currently offers more options for
 mapping, but does not seem to be maintained and doesn't work with newer versions of Tiberius. I have been maintaining a
@@ -15,11 +15,11 @@ simpler implementation.
 
 ## Usage
 
-This is a work in progress. Currently, only the `FromRowZeroCopy` mapper is implemented.
+This is a work in progress. Currently, the `FromRowBorrowed` and `FromRowOwned` mapper is implemented.
 
 ```rust
 
-#[derive(FromRowZeroCopy)] // Derive the FromRowZeroCopy trait on our struct
+#[derive(FromRowBorrowed)] // Derive the FromRowBorrowed trait on our struct
 pub struct Customer<'a> {
     pub id: i32,
     pub first_name: &'a str,
@@ -31,8 +31,8 @@ pub async fn print_customers(pool: &Pool<ConnectionManager>) -> Result<(), Box<d
     const SQL: &str = "select top 10 id, first_name, last_name, description from customers;";
     let mut conn = pool.get().await?;
     let rows = conn.query(SQL, &[]).await?.into_first_result().await?;
-    // Now we can call the from_row_zero_copy method on each row
-    let customers: Vec<Customer> = rows.iter().map(Customer::from_row_zero_copy).collect::<Result<Vec<Customer>, _>>()?;
+    // Now we can call the from_row_borrowed method on each row
+    let customers: Vec<Customer> = rows.iter().map(Customer::from_row_borrowed).collect::<Result<Vec<Customer>, _>>()?;
 
     for customer in customers {
         println!("Customer: {} - {:?} - {:?}", customer.customer_code, customer.description, customer.dispatch_loc_id);
@@ -46,9 +46,11 @@ pub async fn print_customers(pool: &Pool<ConnectionManager>) -> Result<(), Box<d
 
 ## TODO
 
-- Add tests (proc macros are not as straightforward to test!)
-- Support mapping by index
+- Add more tests (proc macros are not as straightforward to test!)
+- Decide whether to support mapping by index for borrowed rows
+    - It may be cleaner to always map into owned types (i.e. remove FromRowBorrowed) and to always map by index (as it's
+      faster) but with an option to validate the row names in the returned query result set against the struct field for
+      safety
 - Improve error messages
-- Support an owned version of the trait (e.g. FromRowOwned or via derive attribute parameters) - this would allow us to
-  support mapping to structs without a lifetime parameter. Would need to map &str to String, etc.
-- Support renaming fields (maybe, not sure if this is a good idea!)
+- Possibly support renaming fields (maybe, not sure if this is a good idea - would need to determine how this interacts
+  with the decision about removing FromRowBorrowed as mentioned above)
