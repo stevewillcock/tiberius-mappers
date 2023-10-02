@@ -23,7 +23,9 @@ This is a work in progress. Currently, the `TryFromRow` mapper is implemented.
 
 ```rust
 
-#[derive(FromRow)] // Derive the FromRow trait on our struct
+use tiberius_mappers::TryFromRow;
+
+#[derive(TryFromRow)] // Derive the FromRow trait on our struct
 pub struct Customer {
     pub id: i32,
     pub first_name: String,
@@ -31,15 +33,11 @@ pub struct Customer {
     pub description: Option<String>,
 }
 
-pub async fn print_customers(pool: &Pool<ConnectionManager>) -> Result<(), Box<dyn error::Error>> {
-    const SQL: &str = "select top 10 id, first_name, last_name, description from customers;";
-    let mut conn = pool.get().await?;
-    let rows = conn.query(SQL, &[]).await?.into_first_result().await?;
-    // Now we can call the from_row method on each row
-    let customers: Vec<Customer> = rows.into_iter().map(Customer::from_row).collect::<Result<Vec<Customer>, _>>()?;
+pub async fn print_customers(rows: Vec<tiberius::Row>) -> Result<(), Box<dyn std::error::Error>> {
+    let customers: Vec<Customer> = rows.into_iter().map(Customer::try_from_row).collect::<Result<Vec<Customer>, _>>()?;
 
     for customer in customers {
-        println!("Customer: {} - {:?} - {:?}", customer.customer_code, customer.description, customer.dispatch_loc_id);
+        println!("Customer: {} - {:?} - {:?}", customer.id, customer.first_name, customer.last_name);
     }
 
     Ok(())
