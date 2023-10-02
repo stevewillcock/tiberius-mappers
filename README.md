@@ -2,6 +2,9 @@
 
 Row mappers for the [Tiberius SQL Server driver](https://github.com/prisma/tiberius).
 
+See the [published crate](https://crates.io/crates/tiberius-mappers) and
+the [documentation](https://docs.rs/crate/tiberius-mappers/latest) for more information.
+
 - Allows you to map tiberius rows to structs
 - Defines `FromRow` trait for `tiberius::Row`
 - Supports deriving the `FromRowOwned` traits for structs via the tiberius-mappers-derive crate
@@ -11,11 +14,12 @@ Row mappers for the [Tiberius SQL Server driver](https://github.com/prisma/tiber
 The existing [tiberius-derive](https://crates.io/crates/tiberius-derive) crate currently offers more options for
 mapping, but does not seem to be maintained and doesn't work with newer versions of Tiberius. I have been maintaining a
 fork of this crate to support newer versions of Tiberius in internal builds, but I wanted to start from scratch with a
-simpler implementation.
+simpler implementation. Note that this implementation is based on the original tiberius-derive crate, so credit to the
+original authors for the idea and some of the code.
 
 ## Usage
 
-This is a work in progress. Currently, the `FromRowBorrowed` and `FromRowOwned` mapper is implemented.
+This is a work in progress. Currently, the `TryFromRow` mapper is implemented.
 
 ```rust
 
@@ -32,7 +36,7 @@ pub async fn print_customers(pool: &Pool<ConnectionManager>) -> Result<(), Box<d
     let mut conn = pool.get().await?;
     let rows = conn.query(SQL, &[]).await?.into_first_result().await?;
     // Now we can call the from_row method on each row
-    let customers: Vec<Customer> = rows.iter().map(Customer::from_row).collect::<Result<Vec<Customer>, _>>()?;
+    let customers: Vec<Customer> = rows.into_iter().map(Customer::from_row).collect::<Result<Vec<Customer>, _>>()?;
 
     for customer in customers {
         println!("Customer: {} - {:?} - {:?}", customer.customer_code, customer.description, customer.dispatch_loc_id);
@@ -51,4 +55,4 @@ pub async fn print_customers(pool: &Pool<ConnectionManager>) -> Result<(), Box<d
   safety
 - Improve error messages
 - Possibly support renaming fields (maybe, not sure if this is a good idea). This would need to interact with the row
-  name validation option mentioned above)
+  name validation option mentioned above.
