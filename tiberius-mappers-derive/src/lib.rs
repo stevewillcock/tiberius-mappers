@@ -24,27 +24,20 @@ fn impl_from_trait_for_row(ast: DeriveInput) -> proc_macro2::TokenStream {
         .map(|(idx, field)| {
             let f_ident = field.ident.unwrap();
             let f_type = field.ty;
-            // This is very closed based on code from tiberius_derive
+            // This is very closely based on code from tiberius_derive
             quote! {
                     #f_ident: {
                         macro_rules! read_data {
                             (Option<$f_type: ty>) => { {
-                                    <$f_type as tiberius::FromSqlOwned>::from_sql_owned(row_iter.next().ok_or_else(
-                                        || tiberius::error::Error::Conversion(
-                                            format!("Could not find field {} from column with index {}", stringify!(#f_ident), #idx).into()
-                                        )
-                                    )?)?
+                                    <$f_type as tiberius::FromSqlOwned>::from_sql_owned(
+                                        row_iter.next().ok_or_else(|| tiberius::error::Error::Conversion(format!("Could not find field {} from column with index {}", stringify!(#f_ident), #idx).into()))?
+                            ).map_err(|e| tiberius::error::Error::Conversion(format!("Could not convert type for optional field {} from column index {} with underlying error {}", stringify!(#f_ident), #idx, e).into()))?
                                } };
                             ($f_type: ty) => { {
-                                (<$f_type as tiberius::FromSqlOwned>::from_sql_owned(row_iter.next().ok_or_else(
-                                    || tiberius::error::Error::Conversion(
-                                        format!("Could not find field {} from column with index {}", stringify!(#f_ident), #idx).into()
-                                    )
-                                )?)?).ok_or_else(
-                                    || tiberius::error::Error::Conversion(
-                                        format!(r" None value for non optional field {} from column with index {}", stringify!(#f_ident), #idx).into()
-                                    )
-                                )?
+                                (<$f_type as tiberius::FromSqlOwned>::from_sql_owned(
+                                    row_iter.next().ok_or_else(|| tiberius::error::Error::Conversion(format!("Could not find field {} from column with index {}", stringify!(#f_ident), #idx).into()))?
+                                ).map_err(|e| tiberius::error::Error::Conversion(format!("Could not convert type for non optional field {} from column index {} with underlying error {}", stringify!(#f_ident), #idx, e).into()))?
+                                ).ok_or_else(|| tiberius::error::Error::Conversion(format!(r"None value for non optional field {} from column with index {}", stringify!(#f_ident), #idx).into()))?
                             }};
                         };
 
