@@ -5,20 +5,20 @@ use syn::{DeriveInput, Field, Ident};
 fn impl_from_trait_for_row(ast: DeriveInput) -> proc_macro2::TokenStream {
     let ident: Ident = ast.ident;
 
-    let mut field_metadatas: Vec<Field> = vec![];
+    let mut fields: Vec<Field> = vec![];
 
     match ast.data {
         syn::Data::Struct(data) => {
             for field in data.fields {
-                if (field.ident).is_some() {
-                    field_metadatas.push(field)
+                if field.ident.is_some() {
+                    fields.push(field)
                 }
             }
         }
         _ => panic!("Only structs are supported by tiberius mappers derive"),
     };
 
-    let field_mappers: Vec<proc_macro2::TokenStream> = field_metadatas
+    let field_mappers: Vec<proc_macro2::TokenStream> = fields
         .into_iter()
         .enumerate()
         .map(|(idx, field)| {
