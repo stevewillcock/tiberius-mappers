@@ -1,10 +1,10 @@
 [package]
 name = "tiberius-mappers-derive"
-version = "0.7.0"
-edition = "2024"
 description = "Derive macros for tiberius-mappers"
-license = "MIT"
-repository = "https://github.com/stevewillcock/tiberius-mappers"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
 
 
 [dependencies]
@@ -14,4 +14,3 @@ proc-macro2 = "1"
 
 [lib]
 proc-macro = true
-

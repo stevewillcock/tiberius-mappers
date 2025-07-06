@@ -1,12 +1,13 @@
-[package]
-name = "tiberius-mappers"
+[workspace]
+members = [
+    "tiberius-mappers",
+    "tiberius-mappers-derive",
+]
+resolver = "3"
+
+# Workspace-wide settings
+[workspace.package]
 version = "0.7.0"
 edition = "2024"
-description = "Row mappers for Tiberius"
 license = "MIT"
 repository = "https://github.com/stevewillcock/tiberius-mappers"
-
-
-[dependencies]
-tiberius = { version = "0.12.3", default-features = false }
-tiberius-mappers-derive = { version = "0.7.0", path = "tiberius-mappers-derive" }

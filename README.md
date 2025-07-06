@@ -58,4 +58,4 @@ pub async fn print_customers(rows: Vec<tiberius::Row>) -> Result<(), Box<dyn std
   safety
 - Improve error messages
 - Possibly support renaming fields (maybe, not sure if this is a good idea). This would need to interact with the row
-  name validation option mentioned above.
+  name validation option mentioned above. 

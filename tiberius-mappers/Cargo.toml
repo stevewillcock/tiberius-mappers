@@ -1,0 +1,12 @@
+[package]
+name = "tiberius-mappers"
+description = "Row mappers for Tiberius"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+
+[dependencies]
+tiberius = { version = "0.12.3", default-features = false }
+tiberius-mappers-derive = { version = "0.7.0", path = "../tiberius-mappers-derive" }

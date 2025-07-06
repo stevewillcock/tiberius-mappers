@@ -1,6 +1,6 @@
 pub use tiberius_mappers_derive::TryFromRow;
 
-#[doc = include_str!("../README.md")]
+#[doc = include_str!("../../README.md")]
 #[cfg(doctest)]
 pub struct ReadmeDocTests;
 
