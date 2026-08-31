@@ -1,7 +1,12 @@
+#[cfg(feature = "tiberius-ng")]
+use tiberius_ng as backend;
+#[cfg(all(feature = "tiberius", not(feature = "tiberius-ng")))]
+use tiberius as backend;
+
 #[cfg(test)]
 mod test {
-    use tiberius::error::Error;
-    use tiberius::{FromSqlOwned, Row};
+    use crate::backend::error::Error;
+    use crate::backend::{FromSqlOwned, Row};
     use tiberius_mappers::TryFromRow;
 
     #[test]
@@ -50,6 +55,7 @@ mod test {
     }
 
     #[test]
+    #[cfg(all(feature = "tiberius", not(feature = "tiberius-ng")))]
     fn can_compile_derived_owned_trait() {
         #[derive(TryFromRow)]
         #[allow(dead_code)]

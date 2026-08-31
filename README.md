@@ -11,12 +11,31 @@ the [documentation](https://docs.rs/crate/tiberius-mappers/latest) for more info
 - Requires the columns in the SQL query to be in the same order as the struct fields
 - Handles null values where these map to Option<T> fields in the struct
 - Currently maps by name in FromRowBorrowed and by index in FromRowOwned
+- Works with either the original `tiberius` crate or the `tiberius-ng` continuation, see [Choosing a backend](#choosing-a-backend)
 
 The existing [tiberius-derive](https://crates.io/crates/tiberius-derive) crate currently offers more options for
 mapping, but does not seem to be maintained and doesn't work with newer versions of Tiberius. I have been maintaining a
 fork of this crate to support newer versions of Tiberius in internal builds, but I wanted to start from scratch with a
 simpler implementation. Note that this implementation is based on the original tiberius-derive crate, so credit to the
 original authors for the idea and some of the code.
+
+## Choosing a backend
+
+You can choose between the [`tiberius`](https://crates.io/crates/tiberius) crate and 
+[`tiberius-ng`](https://crates.io/crates/tiberius-ng), which keeps the same `tiberius` library name and modernises the
+TLS stack. We default to `tiberius`, but you can switch by enabling the `tiberius-ng` feature.
+
+```toml
+tiberius = { version = "0.12.3", default-features = false }
+tiberius-mappers = "0.7"
+```
+
+`tiberius-ng` tracks `tiberius-ng` 0.13. Rename it to `tiberius` when referencing it or the derive macros won't work.
+
+```toml
+tiberius = { package = "tiberius-ng", version = "0.13", default-features = false }
+tiberius-mappers = { version = "0.7", default-features = false, features = ["tiberius-ng"] }
+```
 
 ## Usage
 
