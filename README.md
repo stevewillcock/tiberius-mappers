@@ -27,14 +27,14 @@ TLS stack. We default to `tiberius`, but you can switch by enabling the `tiberiu
 
 ```toml
 tiberius = { version = "0.12.3", default-features = false }
-tiberius-mappers = "0.7"
+tiberius-mappers = "0.8"
 ```
 
 `tiberius-ng` tracks `tiberius-ng` 0.13. Rename it to `tiberius` when referencing it or the derive macros won't work.
 
 ```toml
 tiberius = { package = "tiberius-ng", version = "0.13", default-features = false }
-tiberius-mappers = { version = "0.7", default-features = false, features = ["tiberius-ng"] }
+tiberius-mappers = { version = "0.8", default-features = false, features = ["tiberius-ng"] }
 ```
 
 ## Usage
@@ -68,6 +68,16 @@ pub async fn print_customers(rows: Vec<tiberius::Row>) -> Result<(), Box<dyn std
 }
 
 
+```
+
+## Releases
+
+This repo is not tagged. Cargo stamps the commit it was published from into `.cargo_vcs_info.json` inside each
+published crate, so that file is the record of which commit a release came from:
+
+```sh
+curl -sL https://static.crates.io/crates/tiberius-mappers/tiberius-mappers-0.7.0.crate \
+  | tar xzO tiberius-mappers-0.7.0/.cargo_vcs_info.json
 ```
 
 ## TODO

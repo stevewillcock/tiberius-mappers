@@ -10,7 +10,7 @@ repository.workspace = true
 [dependencies]
 tiberius = { version = "0.12.3", default-features = false, optional = true }
 tiberius_ng = { package = "tiberius-ng", version = "0.13", default-features = false, optional = true }
-tiberius-mappers-derive = { version = "0.7.0", path = "../tiberius-mappers-derive" }
+tiberius-mappers-derive = { version = "0.8.0", path = "../tiberius-mappers-derive" }
 
 [features]
 default = ["tiberius"]

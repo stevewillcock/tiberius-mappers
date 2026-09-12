@@ -7,7 +7,7 @@ resolver = "3"
 
 # Workspace-wide settings
 [workspace.package]
-version = "0.7.0"
+version = "0.8.0"
 edition = "2024"
 license = "MIT"
 repository = "https://github.com/stevewillcock/tiberius-mappers"

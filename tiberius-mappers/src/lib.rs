@@ -6,7 +6,7 @@ compile_error!("enable exactly one backend feature: `tiberius` (0.12) or `tiberi
 #[cfg(feature = "tiberius-ng")]
 use tiberius_ng as tiberius;
 
-#[doc = include_str!("../../README.md")]
+#[doc = include_str!("../README.md")]
 #[cfg(all(doctest, feature = "tiberius", not(feature = "tiberius-ng")))]
 pub struct ReadmeDocTests;
 
